@@ -1,6 +1,11 @@
 #include "AdvCRDS.h"
-#include "nullptr"
 #include <sqlite3.h>
+#include <stdexcept>
+#include <iostream>
+
+// Include the necessary header files for ColumnDefinition and ColumnValue
+#include "ColumnDefinition.h"
+#include "ColumnValue.h"
 
 AdvCRDS::AdvCRDS(const std::string& db_name) {
   int rc = sqlite3_open(db_name.c_str(), &db_);
@@ -42,6 +47,7 @@ bool AdvCRDS::UseDatabase(const std::string& db_name) {
 
 bool AdvCRDS::CreateTable(const std::string& table_name, const std::vector<ColumnDefinition>& columns) {
   std::string sql = "CREATE TABLE " + table_name + " (";
+
   for (const auto& column : columns) {
     sql += column.name + " ";
     switch (column.type) {
@@ -52,11 +58,13 @@ bool AdvCRDS::CreateTable(const std::string& table_name, const std::vector<Colum
         sql += "TEXT";
         break;
     }
+
     if (column.isPrimary) {
       sql += " PRIMARY KEY";
     }
     sql += ",";
   }
+
   sql.pop_back();
   sql += ")";
   char* errmsg = nullptr;
@@ -86,14 +94,17 @@ bool AdvCRDS::Select(const std::string& table_name, const std::vector<std::strin
   }
   sql.pop_back();
   sql += " FROM " + table_name;
+
   if (!where_clause.empty()) {
     sql += " WHERE " + where_clause;
   }
+
   sqlite3_stmt* stmt = nullptr;
   int rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr);
   if (rc != SQLITE_OK) {
     return false;
   }
+
   while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
     for (int i = 0; i < sqlite3_column_count(stmt); i++) {
       switch (sqlite3_column_type(stmt, i)) {
@@ -116,7 +127,7 @@ bool AdvCRDS::Insert(const std::string& table_name, const std::vector<ColumnValu
   for (const auto& value : values) {
     if (value.GetType() == ColumnType::INTEGER) {
       sql += value.ToString() + ",";
-    } else {
+    } else if (value.GetType() == ColumnType::STRING) {
       sql += "'" + value.ToString() + "',";
     }
   }
@@ -134,11 +145,20 @@ bool AdvCRDS::Insert(const std::string& table_name, const std::vector<ColumnValu
 bool AdvCRDS::Update(const std::string& table_name, const std::vector<ColumnValue>& values, const std::string& where_clause) {
   std::string sql = "UPDATE " + table_name + " SET ";
   for (const auto& value : values) {
-    sql += value.ToString() + ",";
+    sql += value.GetName() + " = " + value.ToString() + ",";
   }
+
   sql.pop_back();
+
   if (!where_clause.empty()) {
     sql += " WHERE " + where_clause;
   }
+
   char* errmsg = nullptr;
-  int rc = sqlite3_exec
+  int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errmsg);
+  if (rc != SQLITE_OK) {
+    sqlite3_free(errmsg);
+    return false;
+  }
+  return true;
+}

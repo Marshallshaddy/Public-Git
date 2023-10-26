@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <sqlite3.h>
 
 struct ColumnDefinition;
 struct ColumnValue;
@@ -16,7 +17,7 @@ class AdvCRDS {
 public:
   AdvCRDS(const std::string& db_name);
   ~AdvCRDS();
-  sqlite3* db_;
+
 
   bool CreateDatabase(const std::string& db_name);
   bool DropDatabase(const std::string& db_name);
@@ -30,5 +31,5 @@ public:
   bool Delete(const std::string& table_name, const std::string& where_clause = "");
 
 private:
-  // Implementation details omitted for brevity
+  sqlite3* db_;
 };

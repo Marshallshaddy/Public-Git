@@ -19,7 +19,7 @@ def get_weather_data(city):
 
 def display_weather_data():
     global city_entry
-    city = city_entry.get()
+    city = city_entry.get() 
     weather_data = get_weather_data(city)
     if weather_data is not None:
         weather_window = tk.Toplevel()

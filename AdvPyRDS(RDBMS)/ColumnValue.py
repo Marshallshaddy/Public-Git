@@ -1,3 +1,4 @@
+from AdvPyRDS import ColumnType
 class ColumnValue:
     def __init__(self, value):
         if isinstance(value, int):

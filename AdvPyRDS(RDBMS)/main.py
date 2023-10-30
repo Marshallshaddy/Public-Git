@@ -1,8 +1,10 @@
-from AdvPyRDS import AdvPyRDS, ColumnDefinition, ColumnType, ColumnValue
+from AdvPyRDS import AdvPyRDS, ColumnType
+from ColumnDefinition import ColumnDefinition
+from ColumnValue import ColumnValue
 
 def main():
     # Create a new AdvCRDS instance
-    adv_crds = AdvCRDS("my_database")
+    adv_crds = AdvPyRDS("my_database")
 
     # Create a new table
     columns = [
@@ -28,7 +30,7 @@ def main():
 
             if results:
                 print("Select results:")
-                for row in results:
+                for row in results: # type: ignore
                     for value in row:
                         print(value.to_string(), end=" ")
                     print()

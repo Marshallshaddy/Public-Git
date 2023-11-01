@@ -105,7 +105,7 @@ bool AdvCRDS::Select(const std::string& table_name, const std::vector<std::strin
     return false;
   }
 
-  while ((rc                   = sqlite3_step(stmt)) == SQLITE_ROW) {
+  while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
     for (int i = 0; i < sqlite3_column_count(stmt); i++) {
       switch (sqlite3_column_type(stmt, i)) {
         case SQLITE_INTEGER:
